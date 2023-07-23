@@ -4,7 +4,7 @@
 ### About
 AldensBot is a simple Python program that automatically posts, stickies, and removes YouTube livestream notifications to Reddit.
 
-Created for the moderators of [Vaush](https://www.youtube.com/@Vaush) & developed by thaena of [WhiteFore.st](http://whitefore.st) | [@Whitele-af](https://github.com/Whitele-af)
+Please do not use this program in it's current state, as it was only created for development purposes, and I am currently developing an alternative that uses YouTube's API.
 
 ### Installation and Usage
 1. Create an [app](https://www.reddit.com/prefs/apps) for the Reddit account that will be used
