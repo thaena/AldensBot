@@ -3,11 +3,8 @@ from urllib.request import Request, urlopen
 from random import randint
 from datetime import datetime
 
-# Annoyed me
-warnings.filterwarnings("ignore", category=DeprecationWarning)
-
-# Connects to Reddit account
-reddit=praw.Reddit(
+# Connect to Reddit account
+reddit = praw.Reddit(
     client_id=config.client_id,
     client_secret=config.client_secret,
     user_agent=config.user_agent,
@@ -15,7 +12,7 @@ reddit=praw.Reddit(
     password=config.password,
 )
 
-# Timestamps for terminal
+# Timestamp for terminal
 now = datetime.now()
 current_time = now.strftime("%I:%M:%S %p")
 
@@ -64,56 +61,73 @@ def delete():
             submission.delete()
             print("["+current_time+"] Previous submission removed")
 
-# Tries to connect to livestream
-try:
-    stream=try_stream["best"]
+# Delete url data
+def clean():
+    del livestream_page, livestream_page_bytes, livestream_page_decoded, livestream_url
+    
+    # Delete scheduledTime if defined
+    try:
+        del scheduledTime
+    except NameError:
+        pass
 
-# Fails to connect to livestream
+
+# Try to connect to livestream
+try:
+    stream = try_stream["best"]
+
+# Fail to connect to livestream
 except:
 
-    # Tries to grab unix timestamp for scheduled livestream
+    # Try to grab unix timestamp for scheduled livestream
     try:
         # Unix timestamp for scheduled livestream
         scheduledTime = re.search('"scheduledStartTime":"(.+?)",', livestream_page_decoded).group(1)
 
     # Livestream doesn't exist
     except:
-        # Deletes most recent user submission
+        # Delete url data
+        clean()
+        # Delete most recent user submission
         delete()
         print("["+current_time+"] Stream offline, sleeping...")
 
     # Livestream is scheduled
     else:
+        # Delete url data
+        clean()
         print("["+current_time+"] Stream soon, sleeping...")
 
 # Livestream exists
 else:
 
     # Opens broadcasts.txt to read
-    with open(broadcasts_path, "r+",) as f:
+    with open(broadcasts_path, "r+",) as broadcasts_read:
         # Read broadcasts.txt
-        contents = f.read()
+        contents = broadcasts_read.read()
 
         # Searches for livestream URL in broadcasts.txt
         if contents.find(livestream_url) != -1:
             print("["+current_time+"] Submission has already been posted, sleeping... ")
             # Closes file
-            f.close()
+            broadcasts_read.close()
+            # Delete url data
+            clean()
 
         # Livestream URL not found in broadcasts.txt
         else:
             # Closes file
-            f.close()
+            broadcasts_read.close()
             # Deletes most recent user submission
             delete()
             print("["+current_time+"] Posting submission")
 
             # Opens broadcasts.txt to append
-            with open(broadcasts_path, "a") as f:
+            with open(broadcasts_path, "a") as broadcasts_append:
                 # Writes livestream URL into broadcasts.txt
-                f.write("\n"+livestream_url)
+                broadcasts_append.write("\n"+livestream_url)
                 # Closes file
-                f.close()
+                broadcasts_append.close()
                 # Posts subreddit submission
                 submit()
 
@@ -128,6 +142,8 @@ else:
                 except:
                     # Stickies submission
                     sticky()
+                    # Delete url data
+                    clean()
                     print("["+current_time+"] Submission has been posted and stickied, sleeping...")
 
                 # First sticky exists
@@ -144,8 +160,12 @@ else:
                     except:
                         # Stickies submission
                         sticky()
+                        # Delete url data
+                        clean()
                         print("["+current_time+"] Submission has been posted and stickied, sleeping...")
                     
                     # Second sticky exists
                     else:
+                        # Delete url data
+                        clean()
                         print("["+current_time+"] No sticky slots, an unstickied submission has been posted, sleeping...")

@@ -1,0 +1,5 @@
+__pycache__
+
+# Changes ignored, revert via git update-index --no-assume-unchanged
+config.py
+broadcasts.txt
